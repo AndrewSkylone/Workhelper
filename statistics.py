@@ -12,10 +12,10 @@ import extended_tk as extk
 from extensions_libs.statistics_libs import table
 
 
-class Statistics(tk.LabelFrame):
+class Statistics(tk.Toplevel):
     def __init__(self, master, driver, cfg={}, **kw):
         kw["text"] = "statistics"
-        tk.LabelFrame.__init__(self, master, cfg, **kw)
+        tk.Toplevel.__init__(self, master, cfg, **kw)
 
         self.FILE_PATH = os.path.join("extensions_libs", "statistics_libs", "statistics")
         self.driver = driver

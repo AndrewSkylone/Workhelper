@@ -9,10 +9,10 @@ from googletrans import Translator
 
 import extended_tk as extk
 
-class Suplier(tk.LabelFrame):
+class Suplier(tk.Toplevel):
     def __init__(self, master, driver, cfg={}, **kw):
         kw["text"] = "saved suplier"
-        tk.LabelFrame.__init__(self, master, cfg, **kw)
+        tk.Toplevel.__init__(self, master, cfg, **kw)
 
         self.driver = driver        
         self.create_widgets()

@@ -12,10 +12,10 @@ import extended_tk as extk
 
 config = configuration.__dict__["calculator"]
 
-class Calculator(tk.LabelFrame):
+class Calculator(tk.Toplevel):
     def __init__(self, master, driver, cfg={}, **kw):
         kw["text"] = "calculation"
-        tk.LabelFrame.__init__(self, master, cfg, **kw)
+        tk.Toplevel.__init__(self, master, cfg, **kw)
         
         self.driver = driver
         self.buttons = {} 

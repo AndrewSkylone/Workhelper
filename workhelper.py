@@ -11,7 +11,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 from selenium.common.exceptions import *
 
-import extended_tk, calculator, suplier, extensions as ext #user libs
+import extended_tk, calculator, suplier, statistics, extensions as ext #user libs
   
 class Workhelper(tk.Tk):
     """ Main program frame """
@@ -34,102 +34,58 @@ class Workhelper(tk.Tk):
         buttons_frame = tk.Frame()
         buttons_frame.grid()
 
-        button_open = tk.Button(buttons_frame, text="open margin links", width=16, command=self.open_margin_links)
-        button_open.grid(row=0, column=0, columnspan=2, sticky="w"+"e")
+        create_calculator_button = tk.Button(buttons_frame, text="price calculator", width=16, command=self.create_calculator_frame)
+        create_calculator_button.grid(row=0, column=0, columnspan=2, sticky="w"+"e")
 
-        button_calculation = tk.Button(buttons_frame, text="calculation", command=self.calculation)
-        button_calculation.grid(row=1, column=0, columnspan=2, sticky="w"+"e")
+        create_suplier_button = tk.Button(buttons_frame, text="suplier", command=self.create_suplier_frame)
+        create_suplier_button.grid(row=1, column=0, sticky="w"+"e")
 
-        button_save = tk.Button(buttons_frame, text="save", command=self.save_suplier)
-        button_save.grid(row=2, column=0, sticky="w"+"e")
+        create_statistics_button = tk.Button(buttons_frame, text="statistics", command=self.create_statistics_frame)
+        create_statistics_button.grid(row=2, column=0, sticky="w"+"e")
 
-        button_paste = tk.Button(buttons_frame, text="paste", command=self.paste_suplier)
-        button_paste.grid(row=2, column=1, sticky="w"+"e")
+        tk.Label(buttons_frame).grid(row=3, column=0, sticky="w"+"e") #empty space
+        button_extension = tk.Button(buttons_frame, text="extensions", command=self.create_extensions_frame)
+        button_extension.grid(row=4, column=0, sticky="w"+"e")        
 
-        button_clear = tk.Button(buttons_frame, text="clear frames", command=self.clear_frames)
-        button_clear.grid(row=3, column=0, columnspan=2, sticky="w"+"e")
+    def create_calculator_frame(self):    
+        calculator.Calculator(driver=driver)
 
-        tk.Label(buttons_frame).grid(row=4, column=0, columnspan=2, sticky="w"+"e") #empty space
-        button_extension = tk.Button(buttons_frame, text="extensions", command=self.extensions)
-        button_extension.grid(row=5, column=0, columnspan=2, sticky="w"+"e")        
+    def create_suplier_frame(self):
+        suplier.Suplier(driver=driver)
 
-    def calculation(self):    
-        if frames.get("calculation") and hotkey:
-            frames["calculation"].destroy()
-            del(frames["calculation"])
+    def create_statistics_frame(self):
+        statistics.Statistics(driver=driver)         
 
-            frames["calculation"] = calculator.Calculator(frame, driver=driver, padx=5)
-            frames["calculation"].grid(row=0, column=3, rowspan=15, sticky="n"+"s")
-
-        elif frames.get("calculation") and not hotkey:
-            frames["calculation"].destroy()
-            del(frames["calculation"])
-
-        else:
-            frames["calculation"] = calculator.Calculator(frame, driver=driver, padx=5)
-            frames["calculation"].grid(row=0, column=3, rowspan=15, sticky="n"+"s") 
-
-    def save_suplier(self):
-        if frames.get("suplier") and hotkey:
-            frames["suplier"].destroy()
-            del(frames["suplier"])        
-
-            frames["suplier"] = suplier.Suplier(frame, driver=driver, padx=5)
-            frames["suplier"].grid(row=0, column=2, rowspan=15, sticky="n"+"s")
-        
-        elif frames.get("suplier") and not hotkey:
-            frames["suplier"].destroy()
-            del(frames["suplier"])
-        
-        else:
-            frames["suplier"] = suplier.Suplier(frame, driver=driver, padx=5)
-            frames["suplier"].grid(row=0, column=2, rowspan=15, sticky="n"+"s")
-
-    def paste_suplier(self):
-        if not frames.get("suplier"): return
-        frames["suplier"].paste()
-
-    def clear_frames(self):
-        for frame in frames:
-            frames[frame].destroy()
-        frames.clear()            
-
-    def extensions(self):
-        reload(ext) #delete after debelopment!
-            
-        if frames.get("extensions"):
-            frames["extensions"].destroy()
-            del(frames["extensions"])
-        else:
-            frames["extensions"] = ext.Extensions(frame, driver=driver, padx=5)
-            frames["extensions"].grid(row=0, column=1, rowspan=15, sticky="n"+"s")
-
+    def create_extensions_frame(self):
+        reload(ext) #delete after debelopment!            
+        ext.Extensions(driver=driver)
 
     def on_closing(self):
         driver.quit()
-        frame.destroy()
+        self.destroy()
 
-    def create_profile_chrome_driver(self) -> webdriver:
-        """ Create chrome webdriver with default user profile """
-        
-        os.chdir(sys.path[0])
-        executable_path = os.path.join("chromedriver","chromedriver.exe")
+def create_profile_chrome_driver() -> webdriver:
+    """ Create chrome webdriver with default user profile """
+    
+    os.chdir(sys.path[0])
+    executable_path = os.path.join("chromedriver","chromedriver.exe")
 
-        chrome_options = Options()
-        chrome_options.add_argument(r"user-data-dir=C:\Users\andre\AppData\Local\Google\Chrome\User Data")
-        caps = DesiredCapabilities().CHROME
-        caps["pageLoadStrategy"] = "none"
+    chrome_options = Options()
+    chrome_options.add_argument(r"user-data-dir=C:\Users\andre\AppData\Local\Google\Chrome\User Data")
+    caps = DesiredCapabilities().CHROME
+    caps["pageLoadStrategy"] = "none"
 
-        return webdriver.Chrome(desired_capabilities=caps, executable_path=executable_path, options=chrome_options)
+    return webdriver.Chrome(desired_capabilities=caps, executable_path=executable_path, options=chrome_options)
 
 
 if __name__ == "__main__":
-    workhelper = workhelper()
-    workhelper.driver.get("https://nesky.hktemas.com/order-margins")
+    driver = create_profile_chrome_driver()
+    driver.get("https://nesky.hktemas.com/order-margins")
+    frame = Workhelper()
 
     logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s', datefmt='%I:%M:%S') 
     #disable logging from another libs
     for key in logging.Logger.manager.loggerDict:
         logging.getLogger(key).setLevel(logging.CRITICAL)
 
-    workhelper.mainloop()
+    frame.mainloop()
