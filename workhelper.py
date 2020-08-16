@@ -11,7 +11,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 from selenium.common.exceptions import *
 
-import extended_tk, calculator, suplier, statistics, extensions as ext #user libs
+import extended_tk, calculator, suplier, statistics, extensions as ext, searhcer #user libs
   
 class Workhelper(tk.Tk):
     """ Main program frame """
@@ -41,18 +41,28 @@ class Workhelper(tk.Tk):
         create_statistics_button = tk.Button(buttons_frame, text="statistics", command=self.create_statistics_frame)
         create_statistics_button.grid(row=2, column=0, sticky="w"+"e")
 
-        tk.Label(buttons_frame).grid(row=3, column=0, sticky="w"+"e") #empty space
+        create_searcher_button = tk.Button(buttons_frame, text="searcher", command=self.create_searcher_frame)
+        create_searcher_button.grid(row=3, column=0, sticky="w"+"e")
+
+        tk.Label(buttons_frame).grid(row=4, column=0, sticky="w"+"e") #empty space
         button_extension = tk.Button(buttons_frame, text="extensions", command=self.create_extensions_frame)
-        button_extension.grid(row=4, column=0, sticky="w"+"e")        
+        button_extension.grid(row=5, column=0, sticky="w"+"e")        
 
     def create_calculator_frame(self):    
+        reload(calculator) #delete after debelopment!            
         calculator.Calculator(master=self, driver=driver)
 
     def create_suplier_frame(self):
+        reload(suplier) #delete after debelopment!            
         suplier.Suplier(master=self, driver=driver)
 
     def create_statistics_frame(self):
+        reload(statistics) #delete after debelopment!            
         statistics.Statistics(master=self, driver=driver)         
+
+    def create_searcher_frame(self):
+        reload(searcher) #delete after debelopment!            
+        searcher.Searcher(master=self, driver=driver)
 
     def create_extensions_frame(self):
         reload(ext) #delete after debelopment!            
@@ -76,14 +86,14 @@ def create_profile_chrome_driver() -> webdriver:
     return webdriver.Chrome(desired_capabilities=caps, executable_path=executable_path, options=chrome_options)
 
 
-if __name__ == "__main__":
-    driver = create_profile_chrome_driver()
-    driver.get("https://nesky.hktemas.com/order-margins")
-    frame = Workhelper()
 
-    logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s', datefmt='%I:%M:%S') 
-    #disable logging from another libs
-    for key in logging.Logger.manager.loggerDict:
-        logging.getLogger(key).setLevel(logging.CRITICAL)
+frame = Workhelper()
+driver = create_profile_chrome_driver()
+driver.get("https://nesky.hktemas.com")
 
-    frame.mainloop()
+logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s', datefmt='%I:%M:%S') 
+#disable logging from another libs
+for key in logging.Logger.manager.loggerDict:
+    logging.getLogger(key).setLevel(logging.CRITICAL)
+
+frame.mainloop()

@@ -18,6 +18,31 @@ class OptionMenu(tkinter.OptionMenu):
         tkinter.OptionMenu.__init__(self, master, textvariable, *values)
 
 
+class Toplevel(tkinter.Toplevel):
+    """ Implement singleton """
+    instance = None
+
+    def __init__(self, master, cfg={}, **kw):
+        tkinter.Toplevel.__init__(self, cfg, **kw)
+        mouseX, mouseY = self.get_mouse_position()
+        self.geometry(f"+{mouseX}+{mouseY}")
+        self.resizable(False, False)
+
+        if Toplevel.instance:
+            Toplevel.instance.destroy()
+        Toplevel.instance = self
+    
+    def destroy(self):
+        Toplevel.instance = None
+        tkinter.Toplevel.destroy(self)
+    
+    def get_mouse_position(self):
+        return self.master.winfo_pointerx(), self.master.winfo_pointery()
+
+
+
+
+#TODO move this features into their modules
 def price_sort(orders, prices):
     if not orders: return []
     skuIds = [str(x["propertyValueId"]) for x in orders[0]["skuPropertyValues"]]
@@ -35,7 +60,6 @@ def price_sort(orders, prices):
             if skuId == key:
                 price_sorted.append({skuId : "%.2f" % price[key]})
     return price_sorted
-
 
 def string_to_float(string):
     new_string = "".join([s for s in string if s.isdigit() or s == "," or s =="."])
