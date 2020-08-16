@@ -14,7 +14,7 @@ from selenium.common.exceptions import *
 import extended_tk, calculator, suplier, extensions as ext #user libs
   
 class Workhelper(tk.Tk):
-    """ Main window frame """
+    """ Main program frame """
 
     def __init__(self, master=None, **options):
         tk.Tk.__init__(self, master, **options)
@@ -34,7 +34,7 @@ class Workhelper(tk.Tk):
         buttons_frame = tk.Frame()
         buttons_frame.grid()
 
-        button_open = tk.Button(buttons_frame, text="open links", width=16, command=self.open_links)
+        button_open = tk.Button(buttons_frame, text="open margin links", width=16, command=self.open_margin_links)
         button_open.grid(row=0, column=0, columnspan=2, sticky="w"+"e")
 
         button_calculation = tk.Button(buttons_frame, text="calculation", command=self.calculation)
@@ -53,22 +53,11 @@ class Workhelper(tk.Tk):
         button_extension = tk.Button(buttons_frame, text="extensions", command=self.extensions)
         button_extension.grid(row=5, column=0, columnspan=2, sticky="w"+"e")        
 
-    def open_links(self):
-        driver.switch_to.window("active")
-
-        for element in driver.find_elements(By.CSS_SELECTOR, "input[type='checkbox']"):
-            driver.execute_script("arguments[0].click()", element)
-        for element in driver.find_elements(By.CSS_SELECTOR, "a[target='_blank']"):
-            element.send_keys(Keys.CONTROL, Keys.ENTER)
-
-        driver.switch_to.window(driver.window_handles[1])
-
-
-    def calculation(self, hotkey=False):    
+    def calculation(self):    
         if frames.get("calculation") and hotkey:
             frames["calculation"].destroy()
             del(frames["calculation"])
-            driver.switch_to.window("active")
+
             frames["calculation"] = calculator.Calculator(frame, driver=driver, padx=5)
             frames["calculation"].grid(row=0, column=3, rowspan=15, sticky="n"+"s")
 
@@ -77,15 +66,14 @@ class Workhelper(tk.Tk):
             del(frames["calculation"])
 
         else:
-            driver.switch_to.window("active")
             frames["calculation"] = calculator.Calculator(frame, driver=driver, padx=5)
             frames["calculation"].grid(row=0, column=3, rowspan=15, sticky="n"+"s") 
 
-    def save_suplier(self, hotkey=False):
+    def save_suplier(self):
         if frames.get("suplier") and hotkey:
             frames["suplier"].destroy()
             del(frames["suplier"])        
-            driver.switch_to.window("active")
+
             frames["suplier"] = suplier.Suplier(frame, driver=driver, padx=5)
             frames["suplier"].grid(row=0, column=2, rowspan=15, sticky="n"+"s")
         
@@ -94,23 +82,19 @@ class Workhelper(tk.Tk):
             del(frames["suplier"])
         
         else:
-            driver.switch_to.window("active")
             frames["suplier"] = suplier.Suplier(frame, driver=driver, padx=5)
             frames["suplier"].grid(row=0, column=2, rowspan=15, sticky="n"+"s")
 
     def paste_suplier(self):
-        driver.switch_to.window("active")
-
         if not frames.get("suplier"): return
         frames["suplier"].paste()
 
     def clear_frames(self):
         for frame in frames:
             frames[frame].destroy()
-        frames.clear()
-            
+        frames.clear()            
 
-    def extensions(self, hotkey=False):
+    def extensions(self):
         reload(ext) #delete after debelopment!
             
         if frames.get("extensions"):
