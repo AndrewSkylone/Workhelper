@@ -37,20 +37,14 @@ class Graphic(tk.Toplevel):
 
         total_lable = tk.Label(frame, text="Total time: ")
         total_lable.grid(row=0, column=0, sticky="w")
-<<<<<<< HEAD
         self.total_entry = Etk.Entry(frame, state="readonly", textvariable=tk.StringVar(), bd=0)
-=======
         self.total_entry = mod.Entry(frame, state="readonly", textvariable=tk.StringVar(), bd=0)
->>>>>>> 4eac1ad24ce2c7725786d7de693d5223c38dff2a
         self.total_entry.grid(row=0, column=1, sticky="w")
 
         breaks_lable = tk.Label(frame, text="Without breaks: ")
         breaks_lable.grid(row=1, column=0, sticky="w")
-<<<<<<< HEAD
         self.breaks_entry = Etk.Entry(frame, state="readonly", textvariable=tk.StringVar(), bd=0)        
-=======
         self.breaks_entry = mod.Entry(frame, state="readonly", textvariable=tk.StringVar(), bd=0)        
->>>>>>> 4eac1ad24ce2c7725786d7de693d5223c38dff2a
         self.breaks_entry.grid(row=1, column=1, sticky="w")
 
         self.breaks_scale = tk.Scale(frame, orient=tk.HORIZONTAL, command=self.on_scale)

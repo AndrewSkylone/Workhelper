@@ -1,5 +1,5 @@
 import keyboard, time, tkinter as tk
-from extensions_libs import addons, statistics as stats
+from extensions_libs import addons
 from importlib import reload
 
 

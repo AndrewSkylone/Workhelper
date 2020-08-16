@@ -24,8 +24,6 @@ class Workhelper(tk.Tk):
         self.geometry("+%d+%d" % (100, 700))
         self.protocol("WM_DELETE_WINDOW", self.on_closing)
 
-        self.driver = self.create_profile_chrome_driver()
-
         self.create_widgets()
 
     def create_widgets(self) -> None:
@@ -34,8 +32,8 @@ class Workhelper(tk.Tk):
         buttons_frame = tk.Frame()
         buttons_frame.grid()
 
-        create_calculator_button = tk.Button(buttons_frame, text="price calculator", width=16, command=self.create_calculator_frame)
-        create_calculator_button.grid(row=0, column=0, columnspan=2, sticky="w"+"e")
+        create_calculator_button = tk.Button(buttons_frame, text="calculator", width=16, command=self.create_calculator_frame)
+        create_calculator_button.grid(row=0, column=0, sticky="w"+"e")
 
         create_suplier_button = tk.Button(buttons_frame, text="suplier", command=self.create_suplier_frame)
         create_suplier_button.grid(row=1, column=0, sticky="w"+"e")
@@ -48,17 +46,17 @@ class Workhelper(tk.Tk):
         button_extension.grid(row=4, column=0, sticky="w"+"e")        
 
     def create_calculator_frame(self):    
-        calculator.Calculator(driver=driver)
+        calculator.Calculator(master=self, driver=driver)
 
     def create_suplier_frame(self):
-        suplier.Suplier(driver=driver)
+        suplier.Suplier(master=self, driver=driver)
 
     def create_statistics_frame(self):
-        statistics.Statistics(driver=driver)         
+        statistics.Statistics(master=self, driver=driver)         
 
     def create_extensions_frame(self):
         reload(ext) #delete after debelopment!            
-        ext.Extensions(driver=driver)
+        ext.Extensions(master=self, driver=driver)
 
     def on_closing(self):
         driver.quit()

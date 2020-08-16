@@ -49,7 +49,6 @@ class Table(tk.Toplevel):
                                         command=lambda label=label: self.update_page(label=label))
             button.grid(row=0, column=column, sticky="w"+"e")
 
-<<<<<<< HEAD
         self.page_entry = Etk.Entry(buttons_frame, textvariable=tk.StringVar(), width=5, font=config["entry font"], justify="center")
         self.page_entry.bind("<Return>", lambda e: self.update_page(label="Entered"))
         self.page_entry.grid(row=0, column=2, sticky="w"+"e")
@@ -58,7 +57,6 @@ class Table(tk.Toplevel):
         self.pages_entry.grid(row=1, column=0, columnspan=2, pady=4, sticky="w")
 
         self.total_entry = Etk.Entry(buttons_frame, state="readonly", textvariable=tk.StringVar(), bd=0, justify="left")
-=======
         self.page_entry = mod.Entry(buttons_frame, textvariable=tk.StringVar(), width=5, font=config["entry font"], justify="center")
         self.page_entry.bind("<Return>", lambda e: self.update_page(label="Entered"))
         self.page_entry.grid(row=0, column=2, sticky="w"+"e")
@@ -67,7 +65,6 @@ class Table(tk.Toplevel):
         self.pages_entry.grid(row=1, column=0, columnspan=2, pady=4, sticky="w")
 
         self.total_entry = mod.Entry(buttons_frame, state="readonly", textvariable=tk.StringVar(), bd=0, justify="left")
->>>>>>> 4eac1ad24ce2c7725786d7de693d5223c38dff2a
         self.total_entry.grid(row=2, column=0, columnspan=2, sticky="w")
 
         # functions buttons
@@ -84,11 +81,11 @@ class Table(tk.Toplevel):
         graphic_button.grid(row=0, column=4, padx=3, pady=3, sticky="w"+"e")
 
         # search entry      
-<<<<<<< HEAD
+
         self.search_entry = Etk.Entry(buttons_frame, font=config["entry font"], fg="grey", justify="center")
-=======
+
         self.search_entry = mod.Entry(buttons_frame, font=config["entry font"], fg="grey", justify="center")
->>>>>>> 4eac1ad24ce2c7725786d7de693d5223c38dff2a
+
         self.search_entry.grid(row=0, column=0, columnspan=2, padx=3, pady=3, sticky="w"+"e")
         self.search_entry.insert(0, "Search") 
         self.search_entry.bind("<FocusIn>", self.search_events)
