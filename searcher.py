@@ -22,17 +22,21 @@ class Searcher(extk.Toplevel):
         extk.Toplevel.__init__(self, master, cfg, **kw)
         self.title("Searcher")
 
+
+
+
+class Generator_GUI(tk.LabelFrame):
+    """ Abstract factory frame for different frames generators """
+
+    def __init__(self, master, driver, cfg={}, **kw):
+        tk.LabelFrame.__init__(self, master, cfg, **kw)
+
         self.driver = driver
         self.entries = []
         self.labels = []
-
-        self.driver = driver
-        self.entries = [] # [extkEntry()]
-        self.labels = [] # [tk.Labels()]
         self.hotkeys = []
 
         self.create_widgets()
-        self.add_tags()
     
     def create_widgets(self):
         # button panel
@@ -66,6 +70,19 @@ class Searcher(extk.Toplevel):
         self.nes_entry.grid(row=2, column=1, pady=5, sticky="w"+"e")
         self.nes_entry.textvariable.trace("w", self.generate_tags)
 
+    def destroy(self):
+        for hotkey in self.hotkeys:
+            keyboard.remove_hotkey(hotkey)
+
+        self.hotkeys.clear()
+        tk.LabelFrame.destroy(self)
+
+
+class Generator_service(object):
+    """ Implement Generator bisiness-logical """
+
+    def __init__(self, driver):
+        self.driver = driver
 
     def add_tags(self):
         driver = self.driver
@@ -112,7 +129,6 @@ class Searcher(extk.Toplevel):
 
         for entry in entries:
             ali_tags = set(tag.lower() for tag in entry.get().split())
-            # tags = tags or ali_tags & ali_tags or tags
             tags = tags & ali_tags 
 
         
@@ -151,12 +167,6 @@ class Searcher(extk.Toplevel):
         index = self.labels.index(label)
         translated_tags = Translator().translate(self.entries[index].textvariable.get()).text
         self.entries[index].textvariable.set(translated_tags)
-
-    def destroy(self):
-        for hotkey in self.hotkeys:
-            keyboard.remove_hotkey(hotkey)
-            self.hotkeys.remove(hotkey)
-        tk.LabelFrame.destroy(self)
 
 
 if __name__ == "__main__":
