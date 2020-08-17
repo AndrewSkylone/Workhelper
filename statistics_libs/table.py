@@ -8,7 +8,7 @@ from selenium.common.exceptions import *
 
 import configuration
 import extended_tk as extk
-from extensions_libs.statistics_libs import graphic
+from statistics_libs import graphic
 
 
 reload(configuration)

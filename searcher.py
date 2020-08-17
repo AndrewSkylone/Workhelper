@@ -1,5 +1,6 @@
 import copy, re, keyboard, tkinter as tk
 from tkinter import ttk
+from importlib import reload
 
 from selenium.common.exceptions import *
 from selenium.webdriver.common.by import By
@@ -9,35 +10,25 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import Select
 from googletrans import Translator
 
-<<<<<<< HEAD
-import extended_tk as Etk
-from importlib import reload
-
-
-=======
-import extended_tk as Etk #user modules
-from importlib import reload
+import extended_tk as extk #user modules
+reload(extk)
 
 
 TAGS_ENTRIES_WIDTH = 50
 
 
->>>>>>> 4eac1ad24ce2c7725786d7de693d5223c38dff2a
-class Searcher(tk.LabelFrame):
+class Searcher(extk.Toplevel):
     def __init__(self, master, driver, cfg={}, **kw):
-        kw["text"] = "tags extension"
-        tk.LabelFrame.__init__(self, master, cfg, **kw)
+        extk.Toplevel.__init__(self, master, cfg, **kw)
+        self.title("Searcher")
 
-<<<<<<< HEAD
         self.driver = driver
         self.entries = []
         self.labels = []
-=======
 
         self.driver = driver
-        self.entries = [] # [EtkEntry()]
+        self.entries = [] # [extkEntry()]
         self.labels = [] # [tk.Labels()]
->>>>>>> 4eac1ad24ce2c7725786d7de693d5223c38dff2a
         self.hotkeys = []
 
         self.create_widgets()
@@ -62,11 +53,8 @@ class Searcher(tk.LabelFrame):
         self.search_lable = tk.Label(self, text="0")
         self.search_lable.grid(row=1, column=0, pady=5)
 
-<<<<<<< HEAD
-        self.search_entry = Etk.Entry(self, textvariable=tk.StringVar())
-=======
-        self.search_entry = Etk.Entry(self, textvariable=tk.StringVar(), width=TAGS_ENTRIES_WIDTH)
->>>>>>> 4eac1ad24ce2c7725786d7de693d5223c38dff2a
+        self.search_entry = extk.Entry(self, textvariable=tk.StringVar())
+        self.search_entry = extk.Entry(self, textvariable=tk.StringVar(), width=TAGS_ENTRIES_WIDTH)
         self.search_entry.grid(row=1, column=1)
         self.search_entry.textvariable.trace("w", self.update_tags_size)
 
@@ -74,7 +62,7 @@ class Searcher(tk.LabelFrame):
         self.nes_lable = tk.Label(self, text="NES")
         self.nes_lable.grid(row=2, column=0)
 
-        self.nes_entry = Etk.Entry(self, textvariable=tk.StringVar())
+        self.nes_entry = extk.Entry(self, textvariable=tk.StringVar())
         self.nes_entry.grid(row=2, column=1, pady=5, sticky="w"+"e")
         self.nes_entry.textvariable.trace("w", self.generate_tags)
 
@@ -141,7 +129,7 @@ class Searcher(tk.LabelFrame):
         ali_label.bind("<Button-3>", self.delete_ali_tags)
         ali_label.bind("<Button-1>", self.translate_tags)
 
-        ali_entry = Etk.Entry(self, textvariable=tk.StringVar())
+        ali_entry = extk.Entry(self, textvariable=tk.StringVar())
         ali_entry.grid(row=len(self.entries) + 3, column=1, pady=2, sticky="w"+"e")
         ali_entry.textvariable.set(args["tags"])
         ali_entry.textvariable.trace("w", self.generate_tags)

@@ -11,7 +11,12 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 from selenium.common.exceptions import *
 
-import extended_tk, calculator, suplier, statistics, searcher, extensions as ext #user libs
+import extended_tk
+import calculator
+import suplier
+import statistics
+import searcher
+import extensions as ext
   
 class Workhelper(tk.Tk):
     """ Main program frame """
@@ -84,7 +89,6 @@ def create_profile_chrome_driver() -> webdriver:
     caps["pageLoadStrategy"] = "none"
 
     return webdriver.Chrome(desired_capabilities=caps, executable_path=executable_path, options=chrome_options)
-
 
 frame = Workhelper()
 driver = create_profile_chrome_driver()

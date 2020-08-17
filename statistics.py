@@ -9,7 +9,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import Select
 
 import extended_tk as extk
-from extensions_libs.statistics_libs import table
+from statistics_libs import table
 
 
 class Statistics(extk.Toplevel):
@@ -17,7 +17,7 @@ class Statistics(extk.Toplevel):
         extk.Toplevel.__init__(self, cfg, **kw)
         self.title("Statistics")
 
-        self.FILE_PATH = os.path.join("extensions_libs", "statistics_libs", "statistics")
+        self.FILE_PATH = os.path.join("statistics_libs", "statistics")
         self.driver = driver
         self.user = ""
         self.user_stats = []
