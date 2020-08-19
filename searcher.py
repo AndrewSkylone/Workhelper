@@ -14,75 +14,37 @@ import extended_tk as extk #user modules
 reload(extk)
 
 
-TAGS_ENTRIES_WIDTH = 50
-
+hotkeys = []
+TAGS_ENTRIES_WIDTH = 100
 
 class Searcher(extk.Toplevel):
     def __init__(self, master, driver, cfg={}, **kw):
         extk.Toplevel.__init__(self, master, cfg, **kw)
         self.title("Searcher")
 
-
-
-
-class Generator_GUI(tk.LabelFrame):
-    """ Abstract factory frame for different frames generators """
-
-    def __init__(self, master, driver, cfg={}, **kw):
-        tk.LabelFrame.__init__(self, master, cfg, **kw)
-
         self.driver = driver
         self.entries = []
         self.labels = []
-        self.hotkeys = []
 
         self.create_widgets()
-    
+
     def create_widgets(self):
-        # button panel
+        # buton panel
         self.button_frame = tk.Frame(self)
         self.button_frame.grid(row=0, column=0, sticky="w")
 
         self.add_button = tk.Button(self.button_frame, text="add tags", command=self.add_tags)
         self.add_button.grid(row=0, column=0)
-        self.hotkeys.append(keyboard.add_hotkey('alt + a', self.add_tags))
+        hotkeys.append(keyboard.add_hotkey('alt + a', self.add_tags))
 
-        self.search_button = tk.Button(self.button_frame, text="search tags", command=self.search_tags)
-        self.search_button.grid(row=0, column=1)
-
-        self.clear_button = tk.Button(self.button_frame, text="clear frame", command=self.destroy)
+        self.clear_button = tk.Button(self.button_frame, text="reset search", command=self.reset_search)
         self.clear_button.grid(row=0, column=2)
-
-        # searhing tags 
-        self.search_lable = tk.Label(self, text="0")
-        self.search_lable.grid(row=1, column=0, pady=5)
-
-        self.search_entry = extk.Entry(self, textvariable=tk.StringVar())
-        self.search_entry = extk.Entry(self, textvariable=tk.StringVar(), width=TAGS_ENTRIES_WIDTH)
-        self.search_entry.grid(row=1, column=1)
-        self.search_entry.textvariable.trace("w", self.update_tags_size)
-
         # nes tags
         self.nes_lable = tk.Label(self, text="NES")
         self.nes_lable.grid(row=2, column=0)
 
         self.nes_entry = extk.Entry(self, textvariable=tk.StringVar())
         self.nes_entry.grid(row=2, column=1, pady=5, sticky="w"+"e")
-        self.nes_entry.textvariable.trace("w", self.generate_tags)
-
-    def destroy(self):
-        for hotkey in self.hotkeys:
-            keyboard.remove_hotkey(hotkey)
-
-        self.hotkeys.clear()
-        tk.LabelFrame.destroy(self)
-
-
-class Generator_service(object):
-    """ Implement Generator bisiness-logical """
-
-    def __init__(self, driver):
-        self.driver = driver
 
     def add_tags(self):
         driver = self.driver
@@ -114,6 +76,50 @@ class Generator_service(object):
             tk.messagebox.showerror("404", "No title found")
             return      
         self.generate_tags()
+
+    def reset_search(self):
+        pass                    
+
+class Generator_GUI(tk.LabelFrame):
+    """ Abstract factory frame for different frames generators """
+
+    def __init__(self, master, driver, cfg={}, **kw):
+        tk.LabelFrame.__init__(self, master, cfg, **kw)
+
+        self.driver = driver
+        self.service = Generator_service(driver=driver)
+
+        self.create_widgets()
+    
+    def create_widgets(self):
+        # searhing tags 
+        self.search_lable = tk.Label(self, text="0")
+        self.search_lable.grid(row=1, column=0, pady=5)
+
+        self.search_entry = extk.Entry(self, textvariable=tk.StringVar(), width=TAGS_ENTRIES_WIDTH)
+        self.search_entry.grid(row=1, column=1)
+        self.search_entry.textvariable.trace("w", self.update_tags_size)
+
+
+    def update_tags_size(self):
+        pass
+
+    def generate_tags(self):
+        pass
+    
+    def destroy(self):
+        for hotkey in hotkeys:
+            keyboard.remove_hotkey(hotkey)
+
+        hotkeys.clear()
+        tk.LabelFrame.destroy(self)
+
+
+class Generator_service(object):
+    """ Generator bisiness-logical. Implement abstract factory template. """
+
+    def __init__(self, driver):
+        self.driver = driver
     
     def search_tags(self):
         driver = self.driver

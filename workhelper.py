@@ -17,6 +17,7 @@ import suplier
 import statistics
 import searcher
 import extensions as ext
+
   
 class Workhelper(tk.Tk):
     """ Main program frame """
