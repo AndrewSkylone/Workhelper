@@ -1,40 +1,33 @@
-import tkinter, copy
+import tkinter as tk
+import copy
 
-class Entry(tkinter.Entry):
+class Entry(tk.Entry):
     def __init__(self, master=None, **kw):
         self.textvariable = kw.get("textvariable", None)
-        tkinter.Entry.__init__(self, master, **kw)
+        tk.Entry.__init__(self, master, **kw)
         
         self.bind('<Button-3>', lambda event: self.button_pressed(event))
 
     def button_pressed(self, event):
-        event.widget.delete(0, tkinter.END)
+        event.widget.delete(0, tk.END)
         event.widget.focus()
 
 
-class OptionMenu(tkinter.OptionMenu):
+class OptionMenu(tk.OptionMenu):
     def __init__(self, master, textvariable, *values):
         self.textvariable = textvariable
-        tkinter.OptionMenu.__init__(self, master, textvariable, *values)
+        tk.OptionMenu.__init__(self, master, textvariable, *values)
 
 
-class Toplevel(tkinter.Toplevel):
-    """ Implement singleton """
-    instance = None
+class Toplevel(tk.Toplevel):
+    def __init__(self, master, **kw):
+        tk.Toplevel.__init__(self, master, **kw)
 
-    def __init__(self, master, cfg={}, **kw):
-        tkinter.Toplevel.__init__(self, cfg, **kw)
+        self.__class__.instance = self
+        
         mouseX, mouseY = self.get_mouse_position()
         self.geometry(f"+{mouseX}+{mouseY}")
         self.resizable(False, False)
-
-        if Toplevel.instance:
-            Toplevel.instance.destroy()
-        Toplevel.instance = self
-    
-    def destroy(self):
-        Toplevel.instance = None
-        tkinter.Toplevel.destroy(self)
     
     def get_mouse_position(self):
         return self.master.winfo_pointerx(), self.master.winfo_pointery()

@@ -18,8 +18,17 @@ hotkeys = []
 TAGS_ENTRIES_WIDTH = 100
 
 class Searcher(extk.Toplevel):
-    def __init__(self, master, driver, cfg={}, **kw):
-        extk.Toplevel.__init__(self, master, cfg, **kw)
+    """ Mainframe, add new tags for generating. Singleton """
+
+    instance = None
+
+    def __init__(self, master, driver, **kw):
+        extk.Toplevel.__init__(self, master, **kw)
+
+        if Searcher.instance:
+            Searcher.instance.destroy()
+        Searcher.instance = self
+
         self.title("Searcher")
 
         self.driver = driver
@@ -45,6 +54,14 @@ class Searcher(extk.Toplevel):
 
         self.nes_entry = extk.Entry(self, textvariable=tk.StringVar())
         self.nes_entry.grid(row=2, column=1, pady=5, sticky="w"+"e")
+
+    def destroy(self):
+        for hotkey in hotkeys:
+            keyboard.remove_hotkey(hotkey)
+        hotkeys.clear()
+
+        Searcher.instance = None
+        extk.Toplevel.destroy(self)
 
     def add_tags(self):
         driver = self.driver
@@ -75,7 +92,7 @@ class Searcher(extk.Toplevel):
         else:
             tk.messagebox.showerror("404", "No title found")
             return      
-        self.generate_tags()
+        self.on_tags_add()
 
     def reset_search(self):
         pass                    
@@ -107,14 +124,6 @@ class Generator_GUI(tk.LabelFrame):
     def generate_tags(self):
         pass
     
-    def destroy(self):
-        for hotkey in hotkeys:
-            keyboard.remove_hotkey(hotkey)
-
-        hotkeys.clear()
-        tk.LabelFrame.destroy(self)
-
-
 class Generator_service(object):
     """ Generator bisiness-logical. Implement abstract factory template. """
 
