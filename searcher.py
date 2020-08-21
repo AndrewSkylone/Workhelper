@@ -20,14 +20,8 @@ TAGS_ENTRIES_WIDTH = 100
 class Searcher(extk.Toplevel):
     """ Mainframe, add new tags for generating. Singleton """
 
-    instance = None
-
     def __init__(self, master, driver, **kw):
-        extk.Toplevel.__init__(self, master, **kw)
-
-        if Searcher.instance:
-            Searcher.instance.destroy()
-        Searcher.instance = self
+        super().__init__(master, **kw)
 
         self.title("Searcher")
 
@@ -60,8 +54,7 @@ class Searcher(extk.Toplevel):
             keyboard.remove_hotkey(hotkey)
         hotkeys.clear()
 
-        Searcher.instance = None
-        extk.Toplevel.destroy(self)
+        super().destroy()
 
     def add_tags(self):
         driver = self.driver

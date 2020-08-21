@@ -63,11 +63,11 @@ class Workhelper(tk.Tk):
         suplier.Suplier(master=self, driver=driver)
 
     def create_statistics_frame(self):
-        reload(statistics) #delete after debelopment!            
+        # reload(statistics) #delete after debelopment!            
         statistics.Statistics(master=self, driver=driver)         
 
     def create_searcher_frame(self):
-        reload(searcher) #delete after debelopment!            
+        # reload(searcher) #delete after debelopment!            
         searcher.Searcher(master=self, driver=driver)
 
     def create_extensions_frame(self):

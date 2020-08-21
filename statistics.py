@@ -13,15 +13,9 @@ from statistics_libs import table
 
 
 class Statistics(extk.Toplevel):
-
-    instance = None
     
     def __init__(self, master, driver, **kw):
         extk.Toplevel.__init__(self, master, **kw)
-
-        if Statistics.instance:
-            Statistics.instance.destroy()
-        Statistics.instance = self
 
         self.title("Statistics")
 
@@ -62,9 +56,6 @@ class Statistics(extk.Toplevel):
         self.stats_text = tk.Text(self, width=40, height=-1, padx=5, state=tk.DISABLED)
         self.stats_text.grid(row=3, columnspan=4, padx=5, pady=5, sticky="w")
 
-    def destroy(self):
-        Statistics.instance = None
-        extk.Toplevel.destroy(self)
 
     def create_calendar(self):
         clicks = 0
