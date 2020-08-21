@@ -20,19 +20,25 @@ class OptionMenu(tk.OptionMenu):
 
 
 class Toplevel(tk.Toplevel):
+    """ Singleton """
+
     def __init__(self, master, **kw):
         tk.Toplevel.__init__(self, master, **kw)
-
+      
+        if hasattr(self.__class__, "instance") and self.__class__.instance:
+            self.destroy_old_instance()
         self.__class__.instance = self
-        
+
         mouseX, mouseY = self.get_mouse_position()
         self.geometry(f"+{mouseX}+{mouseY}")
         self.resizable(False, False)
     
     def get_mouse_position(self):
         return self.master.winfo_pointerx(), self.master.winfo_pointery()
-
-
+    
+    def destroy_old_instance(self):
+        self.__class__.instance.destroy()
+        self.__class__.instance = None
 
 
 #TODO move this features into their modules
