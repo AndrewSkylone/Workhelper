@@ -96,32 +96,38 @@ class Searcher_GUI(extk.Toplevel):
         ali_entry.bind("<Return>", self.on_tags_entries_changed)
         self.ali_entries.append(ali_entry)
 
-    def add_tags(self):
-        """ Create new fields with tags or rewrite tags in empty fields """
+    def add_tags_to_empty_ali_entry(self, tags=""):
+        for entry in self.ali_entries:
+            if not entry.get():
+                entry.textvariable.set(tags)
+                break
 
-        entries = self.ali_entries
+    def add_tags(self):
+        """ Create new fields with tags or add tags in empty ali fields """
 
         driver.switch_to.window("active")
 
         if "nesky.hktemas.com" in driver.current_url:
-            tags = self.searcher.download_nes_tags()
-            self.nes_entry.textvariable.set(tags)
-            self.nes_entry.configure(width=max(len(tags), TAGS_ENTRIES_WIDTH))
-
+            self.add_nes_tags()
         elif "aliexpress" in driver.current_url:
-            tags = self.searcher.download_ali_tags()
-            if all(entry.get() for entry in entries):
-                self.create_ali_tags_widgets(tags=tags)
-            else:
-                for entry in entries:
-                    if not entry.get():
-                        entry.textvariable.set(tags)
-                        break
+            self.add_ali_tags()
         else:
             tk.messagebox.showerror("404", "No tags found")
             return
 
         self.on_tags_entries_changed()
+    
+    def add_nes_tags(self):
+        tags = self.searcher.download_nes_tags()
+        self.nes_entry.textvariable.set(tags)
+        self.nes_entry.configure(width=max(len(tags), TAGS_ENTRIES_WIDTH))
+    
+    def add_ali_tags(self):
+        tags = self.searcher.download_ali_tags()
+        if all(entry.get() for entry in self.ali_entries):
+            self.create_ali_tags_widgets(tags=tags)
+        else:
+            self.add_tags_to_empty_ali_entry(tags=tags)
 
     def destroy_ali_tag_widgets(self, event):
         widget = event.widget
