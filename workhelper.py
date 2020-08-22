@@ -56,23 +56,23 @@ class Workhelper(tk.Tk):
 
     def create_calculator_frame(self):    
         reload(calculator) #delete after debelopment!            
-        calculator.Calculator(master=self, driver=driver)
+        calculator.Calculator(master=self, _driver=driver)
 
     def create_suplier_frame(self):
         reload(suplier) #delete after debelopment!            
-        suplier.Suplier(master=self, driver=driver)
+        suplier.Suplier(master=self, _driver=driver)
 
     def create_statistics_frame(self):
         reload(statistics) #delete after debelopment!            
-        statistics.Statistics(master=self, driver=driver)         
+        statistics.Statistics(master=self, _driver=driver)         
 
     def create_searcher_frame(self):
         reload(searcher) #delete after debelopment!            
-        searcher.Searcher(master=self, driver=driver)
+        searcher.Searcher(master=self, _driver=driver)
 
     def create_extensions_frame(self):
         reload(ext) #delete after debelopment!            
-        ext.Extensions(master=self, driver=driver)
+        ext.Extensions(master=self, _driver=driver)
 
     def on_closing(self):
         driver.quit()

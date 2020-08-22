@@ -1,4 +1,7 @@
-import copy, re, keyboard, tkinter as tk
+import copy
+import re
+import keyboard
+import tkinter as tk
 from tkinter import ttk
 from importlib import reload
 
@@ -10,24 +13,27 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import Select
 from googletrans import Translator
 
-import extended_tk as extk #user modules
+import extended_tk as extk  # user modules
 reload(extk)
 
 
-g_driver = None
+driver = None
 hotkeys = []
-TAGS_ENTRIES_WIDTH = 100
+TAGS_ENTRIES_WIDTH = 50
+
 
 class Searcher(extk.Toplevel):
     """ Mainframe, add new tags for generating. Inheritance Singleton template """
 
-    def __init__(self, master, driver, cnf={}, **kw):
+    def __init__(self, master, _driver, cnf={}, **kw):
         super().__init__(master, cnf, **kw)
 
         self.title("Searcher")
 
-        global g_driver
-        g_driver = driver
+        global driver
+        driver = _driver
+
+        self.service = Searcher_service()
         self.entries = []
         self.labels = []
 
@@ -42,11 +48,11 @@ class Searcher(extk.Toplevel):
         self.add_button.grid(row=0, column=0)
         hotkeys.append(keyboard.add_hotkey('alt + a', self.add_tags))
 
-        self.reset_button = tk.Button(self.button_frame, text="reset search", command=self.reset_search)
-        self.reset_button.grid(row=0, column=1)
-
         self.search_button = tk.Button(self.button_frame, text="search all", command=self.search_all_tags)
-        self.search_button.grid(row=0, column=2)
+        self.search_button.grid(row=0, column=1)
+
+        self.reset_button = tk.Button(self.button_frame, text="reset search", command=self.reset_search)
+        self.reset_button.grid(row=0, column=2)
 
         # nes tags
         self.tags_frame = tk.Frame(self)
@@ -66,40 +72,83 @@ class Searcher(extk.Toplevel):
         super().destroy()
 
     def add_tags(self):
+        """ Create new fields with tags or rewrite tags in empty fields """
+
         entries = self.entries
 
-        g_driver.switch_to.window("active")
+        driver.switch_to.window("active")
 
-        if "nesky.hktemas.com" in g_driver.current_url:
-            try:
-                tags_element = g_driver.find_element(By.CSS_SELECTOR, "div.titles>span")
-            except NoSuchElementException:
-                tk.messagebox.showerror("404", "No title found")
-            else:
-                self.nes_entry.textvariable.set(tags_element.text)
+        if "nesky.hktemas.com" in driver.current_url:
+            tags = self.service.download_nes_tags()
+            self.nes_entry.textvariable.set(tags)
+            self.nes_entry.configure(width=max(len(tags), TAGS_ENTRIES_WIDTH))
 
-        elif "aliexpress" in g_driver.current_url:
-            tags_element = g_driver.find_element(By.CLASS_NAME, "product-title-text")
-            language = re.compile('"language":"(\w*)","locale"').findall(g_driver.page_source)[0]
-            text = Translator().translate(tags_element.text, src=language).text
-            # insert in empty tag or create new fields
+        elif "aliexpress" in driver.current_url:
+            tags = self.service.download_ali_tags()
             if all(entry.get() for entry in entries):
-                self.create_ali_tags(tags=text)
+                self.create_ali_tags_widgets(tags=tags)
             else:
-                for entry in entries: 
+                for entry in entries:
                     if not entry.get():
-                        entry.textvariable.set(text)
-                        break                
+                        entry.textvariable.set(tags)
+                        break
         else:
-            tk.messagebox.showerror("404", "No title found")
-            return      
-        self.on_tags_add()
+            tk.messagebox.showerror("404", "No tags found")
+            return
+
+        self.on_tags_entries_changed()
+
+    def create_ali_tags_widgets(self, tags=""):
+        ali_label = tk.Label(self.tags_frame, text="Ali")
+        ali_label.grid(row=len(self.labels) + 3, column=0, pady=2, sticky="w"+"e")
+        self.labels.append(ali_label)
+        ali_label.bind("<Button-3>", self.destroy_ali_tags_widgets)
+
+        ali_entry = extk.Entry(self.tags_frame, textvariable=tk.StringVar())
+        ali_entry.grid(row=len(self.entries) + 3, column=1, pady=2, sticky="w"+"e")
+        ali_entry.textvariable.set(tags)
+        ali_entry.textvariable.trace("w", self.on_tags_entries_changed)
+        self.entries.append(ali_entry)
+
+    def destroy_ali_tags_widgets(self, event):
+        widget = event.widget
+        index = self.labels.index(widget)
+
+        self.labels[index].destroy()
+        self.labels.remove(self.labels[index])
+        self.entries[index].destroy()
+        self.entries.remove(self.entries[index])
+
+        self.on_tags_entries_changed()
 
     def reset_search(self):
-        pass           
+        pass
 
     def search_all_tags(self):
-        pass         
+        pass
+
+    def on_tags_entries_changed(self):
+        pass
+
+class Searcher_service(object):
+     
+    def download_nes_tags(self) -> "string":
+        try:
+            tags_element = driver.find_element(By.CSS_SELECTOR, "div.titles>span")
+        except NoSuchElementException:
+            return ""
+        else:
+            return tags_element.text
+
+    def download_ali_tags(self) -> "string":
+        try:
+            tags_element = driver.find_element(By.CLASS_NAME, "product-title-text")
+        except NoSuchElementException:
+            return ""
+        else:
+            result = re.search('"language":"(\w*)","locale"', driver.page_source)
+            language = result.group(1)
+            return Translator().translate(tags_element.text, src=language).text
 
 class Generator_GUI(tk.LabelFrame):
     """ Abstract factory frame for different frames generators """
@@ -110,23 +159,24 @@ class Generator_GUI(tk.LabelFrame):
         self.service = Generator_service()
 
         self.create_widgets()
-    
+
     def create_widgets(self):
-        # searhing tags 
+        # searhing tags
         self.search_lable = tk.Label(self, text="0")
         self.search_lable.grid(row=1, column=0, pady=5)
 
-        self.search_entry = extk.Entry(self, textvariable=tk.StringVar(), width=TAGS_ENTRIES_WIDTH)
+        self.search_entry = extk.Entry(
+            self, textvariable=tk.StringVar(), width=TAGS_ENTRIES_WIDTH)
         self.search_entry.grid(row=1, column=1)
         self.search_entry.textvariable.trace("w", self.update_tags_size)
-
 
     def update_tags_size(self):
         pass
 
     def generate_tags(self):
         pass
-    
+
+
 class Generator_service(object):
     """ Generator bisiness-logical. Implement abstract factory template. """
 
@@ -135,8 +185,9 @@ class Generator_service(object):
 
     def search_tags(self):
         request = self.search_entry.textvariable.get().replace(" ", "-")
-        g_driver.execute_script("open('https://aliexpress.com/af/%s.html')" % request)
-    
+        driver.execute_script(
+            "open('https://aliexpress.com/af/%s.html')" % request)
+
     def generate_tags(self, *args):
         entries = self.entries
         nes_entry = self.nes_entry
@@ -146,44 +197,13 @@ class Generator_service(object):
 
         for entry in entries:
             ali_tags = set(tag.lower() for tag in entry.get().split())
-            tags = tags & ali_tags 
+            tags = tags & ali_tags
 
-        
         self.search_entry.textvariable.set(" ".join(tags))
         self.update_tags_size()
 
     def update_tags_size(self, *args):
         self.search_lable["text"] = len(self.search_entry.get())
-
-    def create_ali_tags(self, **args):
-        ali_label = tk.Label(self, text="Ali")
-        ali_label.grid(row=len(self.labels) + 3, column=0, pady=2, sticky="w"+"e")
-        self.labels.append(ali_label)
-        ali_label.bind("<Button-3>", self.delete_ali_tags)
-        ali_label.bind("<Button-1>", self.translate_tags)
-
-        ali_entry = extk.Entry(self, textvariable=tk.StringVar())
-        ali_entry.grid(row=len(self.entries) + 3, column=1, pady=2, sticky="w"+"e")
-        ali_entry.textvariable.set(args["tags"])
-        ali_entry.textvariable.trace("w", self.generate_tags)
-        self.entries.append(ali_entry)
-
-    def delete_ali_tags(self, event):
-        widget = event.widget
-        index = self.labels.index(widget)
-
-        self.labels[index].destroy()
-        self.labels.remove(self.labels[index])
-        self.entries[index].destroy()
-        self.entries.remove(self.entries[index])
-
-        self.generate_tags()
-
-    def translate_tags(self, event):
-        label = event.widget
-        index = self.labels.index(label)
-        translated_tags = Translator().translate(self.entries[index].textvariable.get()).text
-        self.entries[index].textvariable.set(translated_tags)
 
 
 if __name__ == "__main__":
