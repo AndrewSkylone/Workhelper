@@ -68,7 +68,7 @@ class Workhelper(tk.Tk):
 
     def create_searcher_frame(self):
         reload(searcher) #delete after debelopment!            
-        searcher.Searcher(master=self, _driver=driver)
+        searcher.Searcher_GUI(master=self, _driver=driver)
 
     def create_extensions_frame(self):
         reload(ext) #delete after debelopment!            

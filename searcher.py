@@ -22,7 +22,7 @@ hotkeys = []
 TAGS_ENTRIES_WIDTH = 50
 
 
-class Searcher(extk.Toplevel):
+class Searcher_GUI(extk.Toplevel):
     """ Mainframe, add new tags for generating. Inheritance Singleton template """
 
     def __init__(self, master, _driver, cnf={}, **kw):
@@ -33,14 +33,21 @@ class Searcher(extk.Toplevel):
         global driver
         driver = _driver
 
-        self.service = Searcher_service()
-        self.entries = []
-        self.labels = []
+        self.searcher = Searcher()
+        self.ali_entries = []
+        self.ali_labels = []
+        self.button_frame = None
+        self.generators_frame = None
+        self.tags_frame = None
 
         self.create_widgets()
 
     def create_widgets(self):
-        # buton panel
+        self.create_buttons()
+        self.create_generators()
+        self.create_nes_tags_widgets()
+
+    def create_buttons(self):
         self.button_frame = tk.Frame(self)
         self.button_frame.grid(row=0, column=0, sticky="w")
 
@@ -54,15 +61,20 @@ class Searcher(extk.Toplevel):
         self.reset_button = tk.Button(self.button_frame, text="reset search", command=self.reset_search)
         self.reset_button.grid(row=0, column=2)
 
-        # nes tags
+    def create_generators(self):
+        self.generators_frame = tk.Frame(self)
+        self.generators_frame.grid(row=1, column=0, sticky="w")
+
+    def create_nes_tags_widgets(self):
         self.tags_frame = tk.Frame(self)
-        self.tags_frame.grid(row=1, column=0, sticky="w")
+        self.tags_frame.grid(row=2, column=0, sticky="w")
 
         self.nes_lable = tk.Label(self.tags_frame, text="NES", width=7)
         self.nes_lable.grid(row=0, column=0)
 
         self.nes_entry = extk.Entry(self.tags_frame, textvariable=tk.StringVar())
         self.nes_entry.grid(row=0, column=1, pady=5, sticky="w"+"e")
+        self.nes_entry.bind("<Return>", self.on_tags_entries_changed)
 
     def destroy(self):
         for hotkey in hotkeys:
@@ -71,20 +83,33 @@ class Searcher(extk.Toplevel):
 
         super().destroy()
 
+    def create_ali_tags_widgets(self, tags=""):
+        ali_label = tk.Label(self.tags_frame, text="Ali")
+        ali_label.grid(row=len(self.ali_labels) + 3, column=0, pady=2, sticky="w"+"e")
+        self.ali_labels.append(ali_label)
+        ali_label.bind("<Button-3>", self.destroy_ali_tag_widgets)
+
+        ali_entry = extk.Entry(self.tags_frame, textvariable=tk.StringVar(),
+                                width=max(len(tags), TAGS_ENTRIES_WIDTH))
+        ali_entry.grid(row=len(self.ali_entries) + 3, column=1, pady=2, sticky="w"+"e")
+        ali_entry.textvariable.set(tags)
+        ali_entry.bind("<Return>", self.on_tags_entries_changed)
+        self.ali_entries.append(ali_entry)
+
     def add_tags(self):
         """ Create new fields with tags or rewrite tags in empty fields """
 
-        entries = self.entries
+        entries = self.ali_entries
 
         driver.switch_to.window("active")
 
         if "nesky.hktemas.com" in driver.current_url:
-            tags = self.service.download_nes_tags()
+            tags = self.searcher.download_nes_tags()
             self.nes_entry.textvariable.set(tags)
             self.nes_entry.configure(width=max(len(tags), TAGS_ENTRIES_WIDTH))
 
         elif "aliexpress" in driver.current_url:
-            tags = self.service.download_ali_tags()
+            tags = self.searcher.download_ali_tags()
             if all(entry.get() for entry in entries):
                 self.create_ali_tags_widgets(tags=tags)
             else:
@@ -98,39 +123,34 @@ class Searcher(extk.Toplevel):
 
         self.on_tags_entries_changed()
 
-    def create_ali_tags_widgets(self, tags=""):
-        ali_label = tk.Label(self.tags_frame, text="Ali")
-        ali_label.grid(row=len(self.labels) + 3, column=0, pady=2, sticky="w"+"e")
-        self.labels.append(ali_label)
-        ali_label.bind("<Button-3>", self.destroy_ali_tags_widgets)
-
-        ali_entry = extk.Entry(self.tags_frame, textvariable=tk.StringVar())
-        ali_entry.grid(row=len(self.entries) + 3, column=1, pady=2, sticky="w"+"e")
-        ali_entry.textvariable.set(tags)
-        ali_entry.textvariable.trace("w", self.on_tags_entries_changed)
-        self.entries.append(ali_entry)
-
-    def destroy_ali_tags_widgets(self, event):
+    def destroy_ali_tag_widgets(self, event):
         widget = event.widget
-        index = self.labels.index(widget)
+        index = self.ali_labels.index(widget)
 
-        self.labels[index].destroy()
-        self.labels.remove(self.labels[index])
-        self.entries[index].destroy()
-        self.entries.remove(self.entries[index])
+        self.ali_labels[index].destroy()
+        self.ali_labels.remove(self.ali_labels[index])
+        self.ali_entries[index].destroy()
+        self.ali_entries.remove(self.ali_entries[index])
 
         self.on_tags_entries_changed()
 
     def reset_search(self):
-        pass
+        self.generators_frame.destroy()
+        self.tags_frame.destroy()
+        self.ali_entries.clear()
+        self.ali_labels.clear()
+
+        self.create_generators()
+        self.create_nes_tags_widgets()
+        self.searcher = Searcher()
 
     def search_all_tags(self):
         pass
 
-    def on_tags_entries_changed(self):
-        pass
+    def on_tags_entries_changed(self, event=None):
+        print("entries changed")
 
-class Searcher_service(object):
+class Searcher(object):
      
     def download_nes_tags(self) -> "string":
         try:
@@ -153,10 +173,10 @@ class Searcher_service(object):
 class Generator_GUI(tk.LabelFrame):
     """ Abstract factory frame for different frames generators """
 
-    def __init__(self, master, cfg={}, **kw):
+    def __init__(self, master, generator, cfg={}, **kw):
         tk.LabelFrame.__init__(self, master, cfg, **kw)
 
-        self.service = Generator_service()
+        self.generator = generator
 
         self.create_widgets()
 
@@ -165,8 +185,7 @@ class Generator_GUI(tk.LabelFrame):
         self.search_lable = tk.Label(self, text="0")
         self.search_lable.grid(row=1, column=0, pady=5)
 
-        self.search_entry = extk.Entry(
-            self, textvariable=tk.StringVar(), width=TAGS_ENTRIES_WIDTH)
+        self.search_entry = extk.Entry(self, textvariable=tk.StringVar(), width=TAGS_ENTRIES_WIDTH)
         self.search_entry.grid(row=1, column=1)
         self.search_entry.textvariable.trace("w", self.update_tags_size)
 
@@ -177,7 +196,7 @@ class Generator_GUI(tk.LabelFrame):
         pass
 
 
-class Generator_service(object):
+class Generator(object):
     """ Generator bisiness-logical. Implement abstract factory template. """
 
     def __init__(self):
@@ -189,7 +208,7 @@ class Generator_service(object):
             "open('https://aliexpress.com/af/%s.html')" % request)
 
     def generate_tags(self, *args):
-        entries = self.entries
+        entries = self.ali_entries
         nes_entry = self.nes_entry
 
         nes_tags = nes_entry.textvariable.get().split()
