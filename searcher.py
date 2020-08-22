@@ -14,18 +14,20 @@ import extended_tk as extk #user modules
 reload(extk)
 
 
+g_driver = None
 hotkeys = []
 TAGS_ENTRIES_WIDTH = 100
 
 class Searcher(extk.Toplevel):
-    """ Mainframe, add new tags for generating. Singleton """
+    """ Mainframe, add new tags for generating. Inheritance Singleton template """
 
-    def __init__(self, master, driver, **kw):
-        super().__init__(master, **kw)
+    def __init__(self, master, driver, cnf={}, **kw):
+        super().__init__(master, cnf, **kw)
 
         self.title("Searcher")
 
-        self.driver = driver
+        global g_driver
+        g_driver = driver
         self.entries = []
         self.labels = []
 
@@ -40,14 +42,21 @@ class Searcher(extk.Toplevel):
         self.add_button.grid(row=0, column=0)
         hotkeys.append(keyboard.add_hotkey('alt + a', self.add_tags))
 
-        self.clear_button = tk.Button(self.button_frame, text="reset search", command=self.reset_search)
-        self.clear_button.grid(row=0, column=2)
-        # nes tags
-        self.nes_lable = tk.Label(self, text="NES")
-        self.nes_lable.grid(row=2, column=0)
+        self.reset_button = tk.Button(self.button_frame, text="reset search", command=self.reset_search)
+        self.reset_button.grid(row=0, column=1)
 
-        self.nes_entry = extk.Entry(self, textvariable=tk.StringVar())
-        self.nes_entry.grid(row=2, column=1, pady=5, sticky="w"+"e")
+        self.search_button = tk.Button(self.button_frame, text="search all", command=self.search_all_tags)
+        self.search_button.grid(row=0, column=2)
+
+        # nes tags
+        self.tags_frame = tk.Frame(self)
+        self.tags_frame.grid(row=1, column=0, sticky="w")
+
+        self.nes_lable = tk.Label(self.tags_frame, text="NES", width=7)
+        self.nes_lable.grid(row=0, column=0)
+
+        self.nes_entry = extk.Entry(self.tags_frame, textvariable=tk.StringVar())
+        self.nes_entry.grid(row=0, column=1, pady=5, sticky="w"+"e")
 
     def destroy(self):
         for hotkey in hotkeys:
@@ -57,22 +66,21 @@ class Searcher(extk.Toplevel):
         super().destroy()
 
     def add_tags(self):
-        driver = self.driver
         entries = self.entries
 
-        driver.switch_to.window("active")
+        g_driver.switch_to.window("active")
 
-        if "nesky.hktemas.com" in driver.current_url:
+        if "nesky.hktemas.com" in g_driver.current_url:
             try:
-                tags_element = driver.find_element(By.CSS_SELECTOR, "div.titles>span")
+                tags_element = g_driver.find_element(By.CSS_SELECTOR, "div.titles>span")
             except NoSuchElementException:
                 tk.messagebox.showerror("404", "No title found")
             else:
                 self.nes_entry.textvariable.set(tags_element.text)
 
-        elif "aliexpress" in driver.current_url:
-            tags_element = driver.find_element(By.CLASS_NAME, "product-title-text")
-            language = re.compile('"language":"(\w*)","locale"').findall(driver.page_source)[0]
+        elif "aliexpress" in g_driver.current_url:
+            tags_element = g_driver.find_element(By.CLASS_NAME, "product-title-text")
+            language = re.compile('"language":"(\w*)","locale"').findall(g_driver.page_source)[0]
             text = Translator().translate(tags_element.text, src=language).text
             # insert in empty tag or create new fields
             if all(entry.get() for entry in entries):
@@ -88,16 +96,18 @@ class Searcher(extk.Toplevel):
         self.on_tags_add()
 
     def reset_search(self):
-        pass                    
+        pass           
+
+    def search_all_tags(self):
+        pass         
 
 class Generator_GUI(tk.LabelFrame):
     """ Abstract factory frame for different frames generators """
 
-    def __init__(self, master, driver, cfg={}, **kw):
+    def __init__(self, master, cfg={}, **kw):
         tk.LabelFrame.__init__(self, master, cfg, **kw)
 
-        self.driver = driver
-        self.service = Generator_service(driver=driver)
+        self.service = Generator_service()
 
         self.create_widgets()
     
@@ -120,13 +130,12 @@ class Generator_GUI(tk.LabelFrame):
 class Generator_service(object):
     """ Generator bisiness-logical. Implement abstract factory template. """
 
-    def __init__(self, driver):
-        self.driver = driver
-    
+    def __init__(self):
+        pass
+
     def search_tags(self):
-        driver = self.driver
         request = self.search_entry.textvariable.get().replace(" ", "-")
-        driver.execute_script("open('https://aliexpress.com/af/%s.html')" % request)
+        g_driver.execute_script("open('https://aliexpress.com/af/%s.html')" % request)
     
     def generate_tags(self, *args):
         entries = self.entries
