@@ -32,10 +32,10 @@ class Searcher_GUI(extk.Toplevel):
 
         global driver
         driver = _driver
-
         self.searcher = Searcher()
         self.ali_entries = []
         self.ali_labels = []
+        self.generators = []        
         self.button_frame = None
         self.generators_frame = None
         self.tags_frame = None
@@ -65,6 +65,10 @@ class Searcher_GUI(extk.Toplevel):
         self.generators_frame = tk.Frame(self)
         self.generators_frame.grid(row=1, column=0, sticky="w")
 
+        generator = Generator_GUI(self.generators_frame, searcher_GUI=self, generator=Matching_generator())
+        generator.grid(row=0, column=0, sticky="w"+"e")
+        self.generators.append(generator)
+
     def create_nes_tags_widgets(self):
         self.tags_frame = tk.Frame(self)
         self.tags_frame.grid(row=2, column=0, sticky="w")
@@ -72,7 +76,7 @@ class Searcher_GUI(extk.Toplevel):
         self.nes_lable = tk.Label(self.tags_frame, text="NES", width=7)
         self.nes_lable.grid(row=0, column=0)
 
-        self.nes_entry = extk.Entry(self.tags_frame, textvariable=tk.StringVar())
+        self.nes_entry = extk.Entry(self.tags_frame, textvariable=tk.StringVar(), width=TAGS_ENTRIES_WIDTH)
         self.nes_entry.grid(row=0, column=1, pady=5, sticky="w"+"e")
         self.nes_entry.bind("<Return>", self.on_tags_entries_changed)
 
@@ -89,8 +93,7 @@ class Searcher_GUI(extk.Toplevel):
         self.ali_labels.append(ali_label)
         ali_label.bind("<Button-3>", self.destroy_ali_tag_widgets)
 
-        ali_entry = extk.Entry(self.tags_frame, textvariable=tk.StringVar(),
-                                width=max(len(tags), TAGS_ENTRIES_WIDTH))
+        ali_entry = extk.Entry(self.tags_frame, textvariable=tk.StringVar(), width=max(len(tags), TAGS_ENTRIES_WIDTH))
         ali_entry.grid(row=len(self.ali_entries) + 3, column=1, pady=2, sticky="w"+"e")
         ali_entry.textvariable.set(tags)
         ali_entry.bind("<Return>", self.on_tags_entries_changed)
@@ -141,6 +144,8 @@ class Searcher_GUI(extk.Toplevel):
         self.on_tags_entries_changed()
 
     def reset_search(self):
+        """ Destroy old objects and create new """
+
         self.generators_frame.destroy()
         self.tags_frame.destroy()
         self.ali_entries.clear()
@@ -151,10 +156,12 @@ class Searcher_GUI(extk.Toplevel):
         self.searcher = Searcher()
 
     def search_all_tags(self):
-        pass
+        for generator in self.generators:
+            generator.search_tags()
 
     def on_tags_entries_changed(self, event=None):
-        print("entries changed")
+        for generator in self.generators:
+            generator.generate_tags()
 
 class Searcher(object):
      
@@ -176,59 +183,77 @@ class Searcher(object):
             language = result.group(1)
             return Translator().translate(tags_element.text, src=language).text
 
-class Generator_GUI(tk.LabelFrame):
+class Generator_GUI(tk.Frame):
     """ Abstract factory frame for different frames generators """
 
-    def __init__(self, master, generator, cfg={}, **kw):
+    def __init__(self, master, searcher_GUI, generator, cfg={}, **kw):
         tk.LabelFrame.__init__(self, master, cfg, **kw)
 
         self.generator = generator
+        self.searcher_GUI = searcher_GUI
 
         self.create_widgets()
 
     def create_widgets(self):
-        # searhing tags
-        self.search_lable = tk.Label(self, text="0")
-        self.search_lable.grid(row=1, column=0, pady=5)
+        search_button = tk.Button(self, text="search", command=self.search_tags)
+        search_button.grid(row=0, column=0)
+
+        self.symbols_num_label = tk.Label(self, text="0", width=5)
+        self.symbols_num_label.grid(row=0, column=1)
 
         self.search_entry = extk.Entry(self, textvariable=tk.StringVar(), width=TAGS_ENTRIES_WIDTH)
-        self.search_entry.grid(row=1, column=1)
+        self.search_entry.grid(row=0, column=2)
         self.search_entry.textvariable.trace("w", self.update_tags_size)
 
-    def update_tags_size(self):
-        pass
+    def update_tags_size(self, *args):
+        self.symbols_num_label["text"] = len(self.search_entry.get())
+
+    def search_tags(self):
+        request = self.search_entry.get().replace(" ", "-")
+        driver.execute_script("open('https://aliexpress.com/af/%s.html')" % request)
 
     def generate_tags(self):
-        pass
+        SEARCHING_WORDS = 10
+
+        ali_entries_tags = [entry.get() for entry in self.searcher_GUI.ali_entries]
+        nes_entry_tags = [self.searcher_GUI.nes_entry.get()]
+        tags = ali_entries_tags + nes_entry_tags
+        
+        searching_tags = self.generator.generate_tags(tags_strings=tags)
+        self.search_entry.textvariable.set(searching_tags[:SEARCHING_WORDS])
 
 
 class Generator(object):
     """ Generator bisiness-logical. Implement abstract factory template. """
 
-    def __init__(self):
-        pass
+    def generate_tags(self):
+        raise NotImplementedError
 
-    def search_tags(self):
-        request = self.search_entry.textvariable.get().replace(" ", "-")
-        driver.execute_script(
-            "open('https://aliexpress.com/af/%s.html')" % request)
+class Matching_generator(Generator):
 
-    def generate_tags(self, *args):
-        entries = self.ali_entries
-        nes_entry = self.nes_entry
+    def generate_tags(self, tags_strings : list) -> list:
+        lower_tags_strings = [tags.lower() for tags in tags_strings]
 
-        nes_tags = nes_entry.textvariable.get().split()
-        tags = set(tag.lower() for tag in nes_tags)
+        unique_tags_in_rows_lists = [list(set(tags_string.split())) for tags_string in lower_tags_strings]
+        unique_tags_in_rows = sum(unique_tags_in_rows_lists, [])
+        all_unique_tags = list(set(unique_tags_in_rows))    
 
-        for entry in entries:
-            ali_tags = set(tag.lower() for tag in entry.get().split())
-            tags = tags & ali_tags
+        tags_matches = []
+        for tag in all_unique_tags:
+            tag_matches = self.count_matches(word=tag, words=unique_tags_in_rows)
+            if tag_matches > 1:
+                tags_matches.append([tag, tag_matches])
+        tags_matches.sort(key=lambda List: List[1], reverse=True)
 
-        self.search_entry.textvariable.set(" ".join(tags))
-        self.update_tags_size()
+        return [tag[0] for tag in tags_matches]
 
-    def update_tags_size(self, *args):
-        self.search_lable["text"] = len(self.search_entry.get())
+    def count_matches(self, word : str, words : list) -> int:
+        matches = 0
+        for w in words:
+            if w == word:
+                matches +=1
+
+        return matches
 
 
 if __name__ == "__main__":
