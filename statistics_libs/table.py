@@ -255,7 +255,7 @@ class Table(tk.Toplevel):
         page = page or int(self.page_entry.get())
         pages = math.ceil(len(self.stats) / 15)
 
-        if page < 1 or page > 48:
+        if page < 1 or page > pages:
             return
         if label == "First":
             page = 1
