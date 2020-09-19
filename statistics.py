@@ -14,8 +14,8 @@ from statistics_libs import table
 
 class Statistics(extk.Toplevel):
     
-    def __init__(self, master, driver, **kw):
-        extk.Toplevel.__init__(self, master, **kw)
+    def __init__(self, master, driver, cfg={}, **kw):
+        extk.Toplevel.__init__(self, master, cfg, **kw)
 
         self.title("Statistics")
 
@@ -114,7 +114,7 @@ class Statistics(extk.Toplevel):
                 next_button = driver.find_element(By.LINK_TEXT, "Next")
                 driver.execute_script("arguments[0].click()", next_button)
                 if index != last - 1:
-                    WebDriverWait(driver, 3).until_not(EC.text_to_be_present_in_element((By.XPATH, "//tabset/div/tab[2]/div/div[4]/table/tbody"), text))
+                    WebDriverWait(driver, 6).until_not(EC.text_to_be_present_in_element((By.XPATH, "//tabset/div/tab[2]/div/div[4]/table/tbody"), text))
             return stats
         def fix_dates(**kw):
             dates = self.period_dates(dates_str=kw["dates"])

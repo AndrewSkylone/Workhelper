@@ -1,0 +1,13 @@
+pr : Product "". 
+op : Option "". 
+pc : Pressed cancel. 
+uc : Used comment "". 
+ao : Availiable options
+pna : Product is not availiable
+mcc : Moved to the bucket Customer Care. 
+mmo : Moved to the bucket Manual Ordering. 
+pnaa : Product is not availiable on Ali. 
+capo : Correct alternative product was offered. 
+nm : Order item No margin
+apo : An alternative product was offered.
+csc : Connected supplier is correct. 

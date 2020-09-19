@@ -131,14 +131,15 @@ class Table(tk.Toplevel):
         click_posx = None
         def open_selected(event):
             SITE_LINK = "https://nesky.hktemas.com/"
-            links = {"Viewed Order" : SITE_LINK + "orders/",
+            links = {
+                    "Viewed Order" : SITE_LINK + "orders/",
                     "Added Memo" : SITE_LINK + "orders/",
                     "Updated Bucket" : SITE_LINK + "orders/",
                     "Viewed Product Flow" : SITE_LINK + "product-flow/",
                     "Viewed Order Flow" : SITE_LINK + "order-item-flow-page/",
                     "Pressed Reprocess" : SITE_LINK + "order-item-flow-page/",
-                    "Updated Price using Base Price" : SITE_LINK + "order-item-flow-page/"}
-
+                    "Updated Price using Base Price" : SITE_LINK + "order-item-flow-page/"
+                    }
             selected = table.selection()
             for iid in selected:
                 item = table.item(iid)

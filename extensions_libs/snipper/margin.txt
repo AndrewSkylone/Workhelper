@@ -1,0 +1,16 @@
+pr : Product "". 
+op : Option "". 
+bs : Bestseller. 
+mrk : Mark "Do not change price". 
+pch : Price has been changed (previous price  = new price ) 
+poch : Prices for the rest options have been also changed correctly. 
+acs : Added cheaper suplier. 
+pok : Price is ok. 
+pook : Prices for the rest options are ok. 
+supcon : Suppliers were connected where it was necessary. 
+csa : Cheaper supplier is available on ALI. 
+csna : Cheaper supplier is not available on ALI. 
+acof : Added comment to order flow. 
+acpf : Added comment to product flow. 
+mbr : Moved to bucket Roksolana. 
+mpc : Moved to Price Check. / Date of expiration.

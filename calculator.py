@@ -13,9 +13,10 @@ import extended_tk as extk
 config = configuration.__dict__["calculator"]
 
 class Calculator(tk.Toplevel):
-    def __init__(self, master, driver, cfg={}, **kw):
-        kw["text"] = "calculation"
-        tk.Toplevel.__init__(self, master, cfg, **kw)
+    def __init__(self, master, driver, cnf={}, **kw):
+        tk.Toplevel.__init__(self, master, cnf, **kw)
+        
+        self.title("Calculator")        
         
         self.driver = driver
         self.buttons = {} 

@@ -2,13 +2,14 @@ import keyboard, time, tkinter as tk
 from extensions_libs import addons
 from importlib import reload
 
+import extended_tk as extk
+import extensions_libs.snipper.snipper as snipper
 
-class Extensions(tk.Toplevel):
+
+class Extensions(extk.Toplevel):
     """ frame with minor features """
-
     def __init__(self, master, driver, cfg={}, **kw):
-        kw["text"] = "Extensions"
-        tk.Toplevel.__init__(self, master, cfg, **kw)
+        extk.Toplevel.__init__(self, master, cfg, **kw)
 
         self.driver = driver
         
@@ -17,21 +18,17 @@ class Extensions(tk.Toplevel):
     
     def create_widgets(self):
         reload(addons)
-        reload(stats)
+        reload(snipper)
+
+        addons_frame = addons.Addons(self, driver=self.driver)
+        addons_frame.grid(row=1, column=0)
 
         buttons_frame = tk.Frame(self)
-        buttons_frame.grid(row=0, column=0, padx=5, sticky="N")
+        buttons_frame.grid(row=0, column=0, padx=5, pady=5, sticky="N")
 
-        addons_frame = addons.Addons(buttons_frame, driver=self.driver)
-        addons_frame.grid(row=0, column=0)
-    
-    def create_extension_frame(self, extension):
-        if self.extension:
-            self.extension.destroy()
-            self.update()
-   
-        self.extension = extension
-        extension.grid(row=0, column=1)
+        snipper_button = tk.Button(buttons_frame, text="snippets", command=lambda: snipper.Snipper_TopLevel(self))
+        snipper_button.grid(row=0, column=0)
+        
 
 if __name__ == "__main__":
     import workhelper

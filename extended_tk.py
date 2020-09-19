@@ -2,7 +2,7 @@ import tkinter as tk
 import copy
 
 class Entry(tk.Entry):
-    def __init__(self, master=None, **kw):
+    def __init__(self, master, cfg={}, **kw):
         self.textvariable = kw.get("textvariable", None)
         tk.Entry.__init__(self, master, **kw)
         
@@ -37,7 +37,8 @@ class Toplevel(tk.Toplevel):
     def __new__(cls, *args, **kwargs):
         if hasattr(cls, "instance"):
             cls.instance.destroy()
-        return object.__new__(cls)
+        return tk.Toplevel.__new__(cls)
+
     
 
 
